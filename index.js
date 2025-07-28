@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 app.use(cors());
@@ -32,7 +32,12 @@ async function run() {
     })
 
 
-
+    app.get('/jobs/:id', async(req, res)=> {
+      const query = req.params.id;
+      const filter = { _id : new ObjectId(query)};
+      const result = await jobsCollection.findOne(filter);
+      res.send(result);
+    })
 
 
 
