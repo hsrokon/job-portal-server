@@ -24,7 +24,9 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
 
-    const jobsCollection = client.db('jobPortal').collection('jobs');
+    const db = client.db('jobPortal');
+
+    const jobsCollection = db.collection('jobs');
 
     app.get('/jobs', async(req, res)=> {
       const result = await jobsCollection.find().toArray();
@@ -40,6 +42,14 @@ async function run() {
     })
 
 
+
+    const jobApplyCollection = db.collection('jobApplications');
+
+    app.post('/jobs/apply', async(req, res) => {
+      const applicationData = req.body;
+      const result = await jobApplyCollection.insertOne(applicationData);
+      res.send(result);
+    })
 
 
 
