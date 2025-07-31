@@ -48,11 +48,28 @@ async function run() {
         }
       }
       const result1 = await jobsCollection.updateOne(query, updatedJob);
-      console.log(result1);
-      
-
-
+      // console.log(result1);
       res.send(result);
+    })
+
+    app.get('/jobs/apply/myJobApplied/:id', async(req, res)=> {
+      const query = { jobId : req.params.id };
+      const result = await jobApplyCollection.find(query).toArray();
+      res.send(result);
+    })
+
+    app.patch('/jobs/apply/:id', async(req, res) => {
+      const id = req.params.id;
+      const query = { _id : new ObjectId(id) };
+      const updateField = {
+        $set : {
+          status : req.body.status,
+        }
+      }
+
+      const result = await jobApplyCollection.updateOne(query, updateField)
+      res.send(result);
+
     })
 
     app.get('/jobs/apply', async(req, res)=> {
