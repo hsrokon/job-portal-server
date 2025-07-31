@@ -26,6 +26,55 @@ async function run() {
 
     const db = client.db('jobPortal');
 
+    const jobApplyCollection = db.collection('jobApplications');
+
+    app.post('/jobs/apply', async(req, res) => {
+      const applicationData = req.body;
+      const result = await jobApplyCollection.insertOne(applicationData);
+
+      //job application count update
+      const jobId = applicationData.jobId;
+      const query = { _id : new ObjectId(jobId) };
+      const job = await jobsCollection.findOne(query);
+      let count =0;
+      if (job.applicationCount) {
+          count = job.applicationCount + 1;
+      } else {
+        count = 1;
+      }
+      const updatedJob = {
+        $set : {
+          applicationCount : count
+        }
+      }
+      const result1 = await jobsCollection.updateOne(query, updatedJob);
+      console.log(result1);
+      
+
+
+      res.send(result);
+    })
+
+    app.get('/jobs/apply', async(req, res)=> {
+      const email = req.query.email;
+      const query = { applicantEmail : email };
+      const result = await jobApplyCollection.find(query).toArray();
+
+      for( const application of result ) {
+        const query1 = { _id : new ObjectId(application.jobId) };
+        const job = await jobsCollection.findOne(query1)
+        if (job) {
+          application.jobTitle = job.title;
+          application.company = job.company;
+          application.location = job.location;
+          application.companyLogo = job.company_logo;
+        }
+      }
+
+      res.send(result);
+    })
+
+
 
     const jobsCollection = db.collection('jobs');
 
@@ -53,44 +102,6 @@ async function run() {
       const result = await jobsCollection.findOne(filter);
       res.send(result);
     })
-
-
-
-    const jobApplyCollection = db.collection('jobApplications');
-
-    app.post('/jobs/apply', async(req, res) => {
-      const applicationData = req.body;
-      const result = await jobApplyCollection.insertOne(applicationData);
-      res.send(result);
-    })
-
-    app.get('/jobs/apply', async(req, res)=> {
-      const email = req.query.email;
-      const query = { applicantEmail : email };
-      const result = await jobApplyCollection.find(query).toArray();
-
-      for( const application of result ) {
-        const query1 = { _id : new ObjectId(application.jobId) };
-        const job = await jobsCollection.findOne(query1)
-        if (job) {
-          application.jobTitle = job.title;
-          application.company = job.company;
-          application.location = job.location;
-          application.companyLogo = job.company_logo;
-        }
-      }
-
-      res.send(result);
-    })
-
-
-
-    
-
-
-
-    
-
 
 
 
