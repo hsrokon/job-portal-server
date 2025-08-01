@@ -7,7 +7,10 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
-app.use(cors());
+app.use(cors({
+  origin: ['http://localhost:5173'], // setting on server only accept req from this url
+  credentials: true //allowing cookies handle
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -95,6 +98,11 @@ async function run() {
     app.get('/jobs/apply', async(req, res)=> {
       const email = req.query.email;
       const query = { applicantEmail : email };
+
+      //cookie parser automatic set cookies in req.cookies
+      console.log('cookies ...', req.cookies);
+      
+
       const result = await jobApplyCollection.find(query).toArray();
 
       for( const application of result ) {

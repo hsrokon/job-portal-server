@@ -1,0 +1,27 @@
+npm i jsonwebtoken cookie-parser
+1. after successful login generate a token
+jwt.sign(payload, secret_key, {'expiresIn : '1h'})
+
+2. sent token generated in server side, to client side 
+--httpOnly cookies better 
+.cookie('token', token, {
+        httpOnly: true,
+        secure: false //http://localhost:5173/logIn
+      })
+      
+--on the server side 
+app.use(cors({
+  origin: ['http://localhost:5173'], // setting on server > only accept req from this url
+  credentials: true //allowing cookies handle
+}));
+
+--on client side 
+ axios.post('http://localhost:5000/jwt', user, { withCredentials: true }) 
+// withCredentials: true - this says > accept cookie from server
+
+3.  for sensitive/private apis sent token to the server side 
+
+
+4. validate token in server side 
+if valid -- provide data 
+if invalid --  logout
