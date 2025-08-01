@@ -9,10 +9,10 @@ const port = process.env.PORT || 5000;
 
 app.use(cors({
   origin: ['http://localhost:5173'], // setting on server only accept req from this url
-  credentials: true //allowing cookies handle
+  credentials: true //allowing cookies handle || this is necessary to set cookie
 }));
 app.use(express.json());
-app.use(cookieParser());
+app.use(cookieParser());// it processes the requested cookie and make it an object
 
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nfpheel.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -35,16 +35,14 @@ async function run() {
     //auth related api's
     app.post('/jwt', async(req, res)=> {
       const user = req.body;
-      const token = jwt.sign(user, process.env.JWT_SECRET, {expiresIn : '1h'});
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn : '5h' });
       res
       .cookie('token', token, {
-        httpOnly: true,
-        secure: false //http://localhost:5173/logIn
+        httpOnly : true, 
+        secure : false,  //http://localhost:5173/logIn || in production make it true as req will be made https://
       })
-      .send({success: true});
+      .send({success : true})
     })
-
-
 
 
     const db = client.db('jobPortal');
@@ -100,7 +98,7 @@ async function run() {
       const query = { applicantEmail : email };
 
       //cookie parser automatic set cookies in req.cookies
-      console.log('cookies ...', req.cookies);
+      console.log('cookies', req.cookies);
       
 
       const result = await jobApplyCollection.find(query).toArray();
