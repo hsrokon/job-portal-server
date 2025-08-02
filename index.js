@@ -15,6 +15,27 @@ app.use(express.json());
 app.use(cookieParser());// it processes the requested cookie and make it an object
 
 
+const logger = (req, res, next) => {
+  console.log('inside logger');
+  next()
+}
+
+const verifyToken = (req, res, next)=>{
+  // console.log(' inside verify token', req.cookies);
+  const token = req.cookies?.token;
+  if (!token) {
+      return res.status(401).send({ message : 'Unauthorized access' })
+  }
+
+  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=> {
+    if (err) {
+        return res.status(401).send({  message : 'Unauthorized access' })
+    }
+    next();
+  })
+
+}
+
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nfpheel.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -93,12 +114,12 @@ async function run() {
 
     })
 
-    app.get('/jobs/apply', async(req, res)=> {
+    app.get('/jobs/apply', verifyToken, async(req, res)=> {
       const email = req.query.email;
       const query = { applicantEmail : email };
 
       //cookie parser automatic set cookies in req.cookies
-      console.log('cookies', req.cookies);
+      // console.log('cookies', req.cookies);
       
 
       const result = await jobApplyCollection.find(query).toArray();
@@ -122,7 +143,6 @@ async function run() {
     const jobsCollection = db.collection('jobs');
 
     app.get('/jobs', async(req, res)=> {
-
       const email = req.query.email;
       
       let query = {};
