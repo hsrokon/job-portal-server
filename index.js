@@ -31,7 +31,7 @@ const verifyToken = (req, res, next)=> {
     if (err) {
         return res.status(401).send({ message: 'Unauthorized access'});
     }
-    req.user = decoded;
+    req.user = decoded;//setting decoded message that contains user info, for latter check
     next();
   })
 }
@@ -121,8 +121,8 @@ async function run() {
       //cookie parser automatic set cookies in req.cookies
       // console.log('cookies', req.cookies);
 
-      if (req.user.email !== email) {
-          return res.status(403).send({ message : 'Forbidden access.'})
+      if (req.user.email !== email) {//checking decoded user credential : email
+          return res.status(403).send({ message : 'Forbidden access.'}); //can't take/req other user's data
       }
       
 

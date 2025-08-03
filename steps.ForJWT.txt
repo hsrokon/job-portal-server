@@ -30,3 +30,6 @@ any req with axios from client side to "sensitive/private apis" need to set { wi
 4. validate token in server side 
 if valid -- provide data 
 if invalid --  logout
+
+5. Check right user accessing his/her own data based on permission
+from decoded token email with requested user email
