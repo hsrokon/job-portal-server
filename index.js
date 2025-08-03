@@ -20,20 +20,20 @@ const logger = (req, res, next) => {
   next()
 }
 
-const verifyToken = (req, res, next)=>{
-  // console.log(' inside verify token', req.cookies);
-  const token = req.cookies?.token;
+const verifyToken = (req, res, next)=> {
+  const token = req?.cookies?.token;
+
   if (!token) {
-      return res.status(401).send({ message : 'Unauthorized access' })
+      return res.status(401).send({ message: 'Unauthorized Access' });
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=> {
     if (err) {
-        return res.status(401).send({  message : 'Unauthorized access' })
+        return res.status(401).send({ message: 'Unauthorized access'});
     }
+    req.user = decoded;
     next();
   })
-
 }
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.nfpheel.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -120,6 +120,10 @@ async function run() {
 
       //cookie parser automatic set cookies in req.cookies
       // console.log('cookies', req.cookies);
+
+      if (req.user.email !== email) {
+          return res.status(403).send({ message : 'Forbidden access.'})
+      }
       
 
       const result = await jobApplyCollection.find(query).toArray();
